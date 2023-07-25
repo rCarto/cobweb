@@ -1,0 +1,24 @@
+Package: cobweb
+Type: Package
+Title: Build a Road Cobweb Around a City
+Version: 0.1.0
+Authors@R: c(
+    person("Timothée", "Giraud", email = "timothee.giraud@cnrs.fr", 
+        role = c("cre","aut"), comment = c(ORCID = "0000-0002-1932-3323")))
+Description: Use OSRM to build a cobweb around a city. 
+License: GPL-3
+Encoding: UTF-8
+Depends: 
+    R (>= 3.6.0)
+Imports: 
+    osrm,
+    sf, 
+    mapsf,
+    stplanr,
+    tidygeocoder,
+    parallel,
+    doParallel,
+    foreach, 
+    grDevices
+LazyData: true
+RoxygenNote: 7.2.3
