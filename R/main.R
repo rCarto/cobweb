@@ -106,7 +106,7 @@ cobweb <- function(city, span = 2000, nroad = 1000, ncl = 1,
   v <- st_as_sf(data.frame(v_raw), coords = c("long", "lat"), crs = "EPSG:4326")
   v <- st_transform(v, "EPSG:3035")
   zone <- st_buffer(v, span * 1000)
-  x <- st_read("inst/gpkg/eur.gpkg", quiet = TRUE)
+  x <- st_read(system.file("gpkg/eur.gpkg", package = "cobweb"), quiet = TRUE)
   pts <- st_sample(x = st_intersection(st_geometry(zone), st_geometry(x)),
                    size = nroad)
   pts_r <- st_transform(pts, 4326)
