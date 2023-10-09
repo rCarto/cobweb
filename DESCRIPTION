@@ -12,10 +12,14 @@ Depends:
     R (>= 3.6.0)
 Imports: 
     osrm,
+    sf, 
+    mapsf,
+    stplanr,
+    tictoc,
+    tidygeocoder,
     parallel,
     doParallel,
-    foreach
-Suggests: 
-    sf
+    foreach, 
+    grDevices
 LazyData: true
 RoxygenNote: 7.2.3
