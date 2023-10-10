@@ -106,9 +106,11 @@ cobweb <- function(city, span = 2000, nroad = 1000, ncl = 1,
   v <- st_as_sf(data.frame(v_raw), coords = c("long", "lat"), crs = "EPSG:4326")
   v <- st_transform(v, "EPSG:3035")
   zone <- st_buffer(v, span * 1000)
-  x <- st_read(system.file("gpkg/eur.gpkg", package = "cobweb"), quiet = TRUE)
-  pts <- st_sample(x = st_intersection(st_geometry(zone), st_geometry(x)),
-                   size = nroad)
+  land <- st_read(system.file("gpkg/europe.gpkg", package = "cobweb"),
+                  layer = "fg", quiet = TRUE)
+
+  pts <- st_sample(x = st_intersection(st_geometry(zone), st_geometry(land)),
+                   size = nroad, exact = FALSE)
   pts_r <- st_transform(pts, 4326)
   cc <- st_coordinates(pts_r)
   df <- data.frame(srcx = v_raw$long, srcy = v_raw$lat,
@@ -122,15 +124,13 @@ cobweb <- function(city, span = 2000, nroad = 1000, ncl = 1,
 
 
   tic("Exporting the map")
-
-
   x <- st_transform(x, "EPSG:3035")
   x <- unique(x[, c("duration","distance")])
   x <- st_intersection(st_geometry(x), st_geometry(zone))
   mf_theme("iceberg")
-  mf_export(x = x, filename = filename, width = 800)
+  mf_export(x = x, filename = filename, width = 799)
   mf_map(x, col = "#BDD6DB80", add = TRUE)
-  mf_map(v, pch = "\u066D", add = TRUE, col = "red", cex = 7)
+  mf_map(v, pch = "\u066D", add = TRUE, col = "red", cex = 3)
   mf_title(city, pos = "left", fg = getOption("mapsf.fg"),
            bg = getOption("mapsf.bg"))
   mf_credits("Data: \u24d2 OpenStreetMap contributors, Routing: OSRM")
@@ -139,5 +139,71 @@ cobweb <- function(city, span = 2000, nroad = 1000, ncl = 1,
 }
 
 
-
-
+#'
+#' #' Title
+#' #'
+#' #' @param city
+#' #' @param span
+#' #' @param nroad
+#' #' @param ncl
+#' #' @param filename
+#' #' @param verbose
+#' #' @param url
+#' #'
+#' #' @return
+#' #' @export
+#' #'
+#' #' @examples
+#' mainroad <- function(city, span = 2000, nroad = 1000, ncl = 1,
+#'                      filename = "map.png", verbose = FALSE,
+#'                      url = "http://0.0.0.0:5000/"){
+#'   verbose <- !verbose
+#'
+#'
+#'   tic("Getting the city position")
+#'   v_raw <- suppressMessages(tidygeocoder::geo(city, progress_bar = FALSE,
+#'                                               verbose = FALSE))
+#'   v_raw <- v_raw[1,]
+#'   if(is.na(v_raw$lat)){stop("City not found!")}
+#'   toc(quiet = verbose)
+#'
+#'
+#'   tic("Preparing queries")
+#'   v <- st_as_sf(data.frame(v_raw), coords = c("long", "lat"), crs = "EPSG:4326")
+#'   v <- st_transform(v, "EPSG:3035")
+#'   zone <- st_buffer(v, span * 1000)
+#'   land <- st_read(system.file("gpkg/europe.gpkg", package = "cobweb"),
+#'                   layer = "fg", quiet = TRUE)
+#'
+#'   pts <- st_sample(x = st_intersection(st_geometry(zone), st_geometry(land)),
+#'                    size = nroad * 2, exact = TRUE)
+#'   pts_r <- st_transform(pts, 4326)
+#'   cc <- st_coordinates(pts_r)
+#'   df <- data.frame(srcx = cc[1:nroad, 1],
+#'                    srcy = cc[1:nroad, 2],
+#'                    dstx = cc[(nroad+1):(2*nroad), 1],
+#'                    dsty = cc[(nroad+1):(2*nroad), 2])
+#'   toc(quiet = verbose)
+#'
+#'
+#'   tic("Getting the roads from OSRM")
+#'   x <- get_routes(df, ncl = ncl, url = url)
+#'   toc(quiet = verbose)
+#'
+#'
+#'   tic("Exporting the map")
+#'   x <- st_transform(x, "EPSG:3035")
+#'   x <- unique(x[, c("duration","distance")])
+#'   x <- st_intersection(st_geometry(x), st_geometry(zone))
+#'   return(x)
+#'   mf_theme("iceberg")
+#'   mf_export(x = x, filename = filename, width = 799)
+#'   mf_map(x, col = "#BDD6DB20", add = TRUE)
+#'   mf_map(v, pch = "\u066D", add = TRUE, col = "red", cex = 3)
+#'   mf_title(city, pos = "left", fg = getOption("mapsf.fg"),
+#'            bg = getOption("mapsf.bg"))
+#'   mf_credits("Data: \u24d2 OpenStreetMap contributors, Routing: OSRM")
+#'   invisible(dev.off())
+#'   toc(quiet = verbose)
+#' }
+#'
